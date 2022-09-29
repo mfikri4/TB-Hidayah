@@ -1,0 +1,148 @@
+@extends('admin.app')
+@section('content')
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+    <h3>Tambah Transaksi</h3>
+        <hr>
+        <div class="row justify-content-center">
+            <div class="col-lg-12 ">
+                @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+                <form  action="{{ url('admin/transaction/create') }}" method="post">
+                    {{ csrf_field() }}
+                    <div class="field_wrapper">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-2 mb-2">
+                                <label class="visually-hidden">Name</label>
+                                <input type="text" class="form-control" placeholder="Nama Pembeli">
+                            </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-4">
+                            <label class="visually-hidden">Nama Barang</label>
+                            <select class="form-control select-state" name="items_id" id="items_id" required>
+                                <option value="" hidden="">--- Pilih Barang ---</option>
+                                @foreach ($itm as $items)
+                                    <option value="{{ $items->id }}">{{$items->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>        
+                        
+                        <div id="detail_items"></div>
+                        
+                        
+                        <div class="col-2">
+                            <label class="visually-hidden">Jumlah</label>
+                            <input type="number" name="qty_transaction"  id="qty_transaction" class="form-control" placeholder="qty">
+                        </div>
+                        
+                        <div class="col-2">
+                            <label class="visually-hidden">Harga </label>
+                            <input type="number" readonly id="price_sell" class="form-control" placeholder="Harga Satuan">
+                        </div>
+                        <div class="col-2">
+                            <label class="visually-hidden">Total Harga</label>
+                            <input type="number" readonly class="form-control" placeholder="Total Harga">
+                        </div>  
+                        <div class="col-1">
+                                <a class="btn btn-success" href="javascript:void(0);" id="add_button" title="Add field">TAMBAH</a>
+                        </div>           
+                        </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-lg btn-primary" type="submit">SIMPAN</a>
+                    <script type="text/javascript">
+                    $(document).ready(function(){
+                        var maxField = 10; //Input fields increment limitation
+                        var addButton = $('#add_button'); //Add button selector
+                        var wrapper = $('.field_wrapper'); //Input field wrapper
+                        var fieldHTML = '<div class="form-group add"><div class="row">';
+                        fieldHTML=fieldHTML + '<div class="col-4"><select class="form-control" name="items_id" id="items_id">@foreach ($itm as $items)<option value="{{ $items->id }}">{{$items->name}}</option>@endforeach</select></div>';
+                        fieldHTML=fieldHTML + '<div class="col-2"><input type="number" class="form-control" placeholder="Jumlah"></div>';
+                        fieldHTML=fieldHTML + '<div class="col-2"><input type="number" value="" disabled class="form-control" placeholder="Harga"></div>';
+                        fieldHTML=fieldHTML + '<div class="col-2"><input type="number" value="" disabled class="form-control" placeholder="Total Harga"></div>';
+                        fieldHTML=fieldHTML + '<div class="col-md-2"><a href="javascript:void(0);" class="remove_button btn btn-danger">HAPUS</a></div>';
+                        fieldHTML=fieldHTML + '</div></div>'; 
+                        var x = 1; //Initial field counter is 1
+                        
+                        //Once add button is clicked
+                        $(addButton).click(function(){
+                            //Check maximum number of input fields
+                            if(x < maxField){ 
+                                x++; //Increment field counter
+                                $(wrapper).append(fieldHTML); //Add field html
+                            }
+                        });
+                        
+                        //Once remove button is clicked
+                        $(wrapper).on('click', '.remove_button', function(e){
+                            e.preventDefault();
+                            $(this).parent('').parent('').remove(); //Remove field html
+                            x--; //Decrement field counter
+                        });
+                    });
+                    </script>
+                    </div>
+                    </body>
+                    </form>
+        </div>
+        </div>
+@endsection
+@section('js')
+<script>
+        $(document).ready(function () {
+        $('select').selectize({
+            sortField: 'text'
+        });
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha512-3P8rXCuGJdNZOnUx/03c1jOTnMn3rP63nBip5gOP2qmUh5YAdVAvFZ1E+QLZZbC1rtMrQb+mah3AfYW11RUrWA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#qty_transaction").keyup(function(){
+            var qty_transaction  = $("#qty_transaction").val();
+            var price_sell  = $("#price_sell").val();
+
+            var total       = parseInt(price_sell) * parseInt(qty_barang);
+            $("#total").val(total)
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF=TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    $("#items_id").change(function(){
+        var items_id = $("#items_id").val()
+        $.ajax({
+            type: "GET",
+            url : "/ajax",
+            data: "items_id="+items_id,
+            cache:false,
+            success: function(data){
+                $('#detail_items').html(data);
+            }
+        });
+    });
+</script>
+@endsection
